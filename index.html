@@ -418,6 +418,10 @@
     let vadWatchTimer = null;
     let micRecoverTimer = null;
     let vadSeenInSession = false;
+    let lastTypedMessage = '';
+    let lastTypedAt = 0;
+    let lastAiBubble = { text: '', at: 0 };
+    let lastUserBubble = { text: '', at: 0 };
 
     function setState(next) {
       callState = next;
@@ -440,6 +444,45 @@
       bubble.textContent = text;
       chatArea.appendChild(bubble);
       chatArea.scrollTop = chatArea.scrollHeight;
+    }
+
+    function normalizeText(text) {
+      return String(text || '')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .toLowerCase();
+    }
+
+    function shouldSkipDuplicate(text, isUser) {
+      const now = Date.now();
+      const normalized = normalizeText(text);
+      if (!normalized) return true;
+
+      if (isUser) {
+        if (
+          normalizeText(lastTypedMessage) === normalized &&
+          now - lastTypedAt < 5000
+        ) {
+          return true;
+        }
+        if (
+          normalizeText(lastUserBubble.text) === normalized &&
+          now - lastUserBubble.at < 3500
+        ) {
+          return true;
+        }
+        lastUserBubble = { text, at: now };
+        return false;
+      }
+
+      if (
+        normalizeText(lastAiBubble.text) === normalized &&
+        now - lastAiBubble.at < 3500
+      ) {
+        return true;
+      }
+      lastAiBubble = { text, at: now };
+      return false;
     }
 
     function setStatusLine(message) {
@@ -492,7 +535,11 @@
         return;
       }
       if (message.source === 'ai' || message.role === 'agent') {
+        if (shouldSkipDuplicate(message.message, false)) return;
         addBubble(message.message, false);
+      } else if (message.source === 'user' || message.role === 'user') {
+        if (shouldSkipDuplicate(message.message, true)) return;
+        addBubble(message.message, true);
       }
     }
 
@@ -532,6 +579,13 @@
           onConnect: () => {
             setState('connected');
             setStatusLine('Aria dinliyor...');
+            try {
+              conversation.sendContextualUpdate(
+                'You are Aria, an AI assistant ONLY for Muvipho Restaurant. Only discuss restaurant topics: menu, reservations, events, opening hours, location, dining recommendations. If user asks unrelated topics, politely steer back to restaurant support.'
+              );
+            } catch (_err) {
+              // no-op
+            }
             if (vadWatchTimer) clearTimeout(vadWatchTimer);
             if (micRecoverTimer) clearTimeout(micRecoverTimer);
             vadWatchTimer = setTimeout(() => {
@@ -649,6 +703,8 @@
       const text = chatInput.value.trim();
       if (!text) return;
 
+      lastTypedMessage = text;
+      lastTypedAt = Date.now();
       addBubble(text, true);
       chatInput.value = '';
 
