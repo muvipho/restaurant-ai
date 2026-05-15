@@ -257,7 +257,7 @@ function triggerWidgetEnd() {
   if (btn) btn.click();
 }
 
-window.handleCallClick = () => {
+window.handleCallClick = async () => {
   if (callState === 'connecting') return; // debounce
   if (callState === 'connected') {
     triggerWidgetEnd();
@@ -267,11 +267,26 @@ window.handleCallClick = () => {
     setState('connecting');
     setStatus('Bağlanıyor (Lütfen bekleyin)...');
 
-    // Small delay to let shadow DOM fully render
+    // Step 1: Request mic permission directly from this user gesture.
+    // This is required because the hidden widget's simulated click is not
+    // considered a trusted gesture by the browser for mic access.
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // We got permission. Stop the tracks immediately – the widget will create its own.
+      stream.getTracks().forEach(t => t.stop());
+    } catch (err) {
+      setState('idle');
+      setStatus(null);
+      bubble(err.name === 'NotAllowedError'
+        ? 'Mikrofon izni verilmedi. Tarayıcı adres çubuğundaki kilit simgesinden mikrofona izin verin.'
+        : 'Mikrofon erişim hatası: ' + err.message);
+      return;
+    }
+
+    // Step 2: Mic permission is now granted. Click the hidden widget button.
     setTimeout(() => {
       const ok = triggerWidgetCall();
       if (!ok) {
-        // Widget button not found — retry once after another 500ms
         setTimeout(() => {
           const ok2 = triggerWidgetCall();
           if (!ok2) {
@@ -281,7 +296,7 @@ window.handleCallClick = () => {
           }
         }, 500);
       } else {
-        // Assume connected after 4s if MutationObserver hasn't fired
+        // Fallback: assume connected after 4s if MutationObserver hasn't fired
         setTimeout(() => {
           if (callState === 'connecting') {
             setState('connected');
