@@ -414,6 +414,8 @@
     let callState = 'idle'; // idle | connecting | connected
     let conversation = null;
     const AGENT_ID = 'agent_9101krknqev9f2wrjyc3h05ha712';
+    let selectedInputDeviceId = undefined;
+    let vadWatchTimer = null;
 
     function setState(next) {
       callState = next;
@@ -469,6 +471,10 @@
 
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const firstTrack = stream.getAudioTracks()[0];
+        selectedInputDeviceId = firstTrack && firstTrack.getSettings
+          ? firstTrack.getSettings().deviceId
+          : undefined;
         stream.getTracks().forEach(t => t.stop());
       } catch (_err) {
         setState('idle');
@@ -481,22 +487,52 @@
         conversation = await Conversation.startSession({
           agentId: AGENT_ID,
           connectionType: "websocket",
+          textOnly: false,
+          inputDeviceId: selectedInputDeviceId,
+          overrides: {
+            conversation: {
+              textOnly: false
+            }
+          },
           onConnect: () => {
             setState('connected');
             setStatusLine('Aria dinliyor...');
+            if (vadWatchTimer) clearTimeout(vadWatchTimer);
+            vadWatchTimer = setTimeout(() => {
+              setStatusLine('Aria dinliyor... (Mikrofon sessiz gorunuyor)');
+            }, 7000);
           },
           onDisconnect: () => {
             setState('idle');
             setStatusLine(null);
             conversation = null;
+            if (vadWatchTimer) {
+              clearTimeout(vadWatchTimer);
+              vadWatchTimer = null;
+            }
           },
           onMessage: handleConversationMessage,
+          onVadScore: ({ vadScore }) => {
+            if (typeof vadScore === 'number' && vadScore > 0.45) {
+              if (vadWatchTimer) {
+                clearTimeout(vadWatchTimer);
+                vadWatchTimer = null;
+              }
+              if (callState === 'connected') {
+                setStatusLine('Sesiniz algilandi, Aria isliyor...');
+              }
+            }
+          },
           onError: (error) => {
             console.error('[Muvipho] Conversation error:', error);
             setState('idle');
             setStatusLine(null);
             addBubble('Baglanti hatasi olustu. Lutfen tekrar deneyin.');
             conversation = null;
+            if (vadWatchTimer) {
+              clearTimeout(vadWatchTimer);
+              vadWatchTimer = null;
+            }
           },
           onStatusChange: ({ status }) => {
             if (status === 'connecting') {
