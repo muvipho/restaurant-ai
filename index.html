@@ -326,11 +326,6 @@ async function startCall() {
   setState('connecting');
   setStatus('Bağlanıyor (Lütfen bekleyin)...');
   try {
-    // Ensure mic permission first
-    if (navigator.mediaDevices?.getUserMedia) {
-      await navigator.mediaDevices.getUserMedia({ audio: true });
-    }
-
     conv = await Conversation.startSession({
       agentId: AGENT_ID,
 
