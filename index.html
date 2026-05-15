@@ -204,56 +204,92 @@ function setStatus(msg) {
 }
 
 // ── Call control ─────────────────────────────────────────────────────────────
+function getWidgetBtn() {
+  // Try to get the primary action button inside the widget's shadow DOM
+  try {
+    const shadow = widget?.shadowRoot;
+    if (!shadow) return null;
+    // Common selectors used by ElevenLabs widget
+    return shadow.querySelector('[data-testid="call-button"]')
+        || shadow.querySelector('button[aria-label]')
+        || shadow.querySelector('button');
+  } catch (_) { return null; }
+}
+
+function watchWidgetState() {
+  // MutationObserver to detect state changes inside shadow DOM
+  try {
+    const shadow = widget?.shadowRoot;
+    if (!shadow) return;
+    const obs = new MutationObserver(() => {
+      const btn = getWidgetBtn();
+      if (!btn) return;
+      const label = (btn.textContent || btn.getAttribute('aria-label') || '').toLowerCase();
+      const isActive = label.includes('end') || label.includes('stop') || label.includes('kapat');
+      if (isActive && callState !== 'connected') {
+        setState('connected');
+        setStatus('Aria dinliyor...');
+      } else if (!isActive && callState === 'connected') {
+        setState('idle');
+        setStatus(null);
+      }
+    });
+    obs.observe(shadow, { subtree: true, childList: true, attributes: true, characterData: true });
+    console.log('[Muvipho] MutationObserver watching widget state');
+  } catch (_) {}
+}
+
 function triggerWidgetCall() {
-  if (!widget) return false;
-  // Try dispatching the standard ElevenLabs widget event
-  try {
-    widget.dispatchEvent(new CustomEvent('elevenlabs-convai:startcall', { bubbles: true }));
+  const btn = getWidgetBtn();
+  if (btn) {
+    console.log('[Muvipho] Clicking widget button:', btn.textContent, btn.outerHTML.slice(0, 100));
+    btn.click();
+    // Also watch for state changes
+    watchWidgetState();
     return true;
-  } catch (_) {}
-  // Fallback: click the button inside shadow DOM if accessible
-  try {
-    const innerBtn = widget.shadowRoot?.querySelector('button');
-    if (innerBtn) { innerBtn.click(); return true; }
-  } catch (_) {}
+  }
+  console.warn('[Muvipho] Could not find widget button in shadow root');
   return false;
 }
 
 function triggerWidgetEnd() {
-  if (!widget) return;
-  try {
-    widget.dispatchEvent(new CustomEvent('elevenlabs-convai:endcall', { bubbles: true }));
-  } catch (_) {}
-  try {
-    // Try to find end-call button inside shadow DOM
-    const btns = widget.shadowRoot?.querySelectorAll('button');
-    btns?.forEach(b => { if (b.textContent?.toLowerCase().includes('end') || b.getAttribute('aria-label')?.includes('end')) b.click(); });
-  } catch (_) {}
+  const btn = getWidgetBtn();
+  if (btn) btn.click();
 }
 
 window.handleCallClick = () => {
+  if (callState === 'connecting') return; // debounce
   if (callState === 'connected') {
     triggerWidgetEnd();
     setState('idle');
     setStatus(null);
-  } else if (callState === 'idle') {
+  } else {
     setState('connecting');
     setStatus('Bağlanıyor (Lütfen bekleyin)...');
-    const ok = triggerWidgetCall();
-    if (!ok) {
-      // Fallback: if widget events don't fire onConnect, assume connecting for 3s then try again
-      setTimeout(() => {
-        if (callState === 'connecting') {
-          setStatus('Widget hazırlanıyor, lütfen bekleyin...');
+
+    // Small delay to let shadow DOM fully render
+    setTimeout(() => {
+      const ok = triggerWidgetCall();
+      if (!ok) {
+        // Widget button not found — retry once after another 500ms
+        setTimeout(() => {
           const ok2 = triggerWidgetCall();
           if (!ok2) {
             setState('idle');
             setStatus(null);
-            bubble('Widget henüz hazır değil, lütfen sayfayı yenileyip tekrar deneyin.');
+            bubble('Widget butonu bulunamadı. Sayfayı yenileyip tekrar deneyin.');
           }
-        }
-      }, 3000);
-    }
+        }, 500);
+      } else {
+        // Assume connected after 4s if MutationObserver hasn't fired
+        setTimeout(() => {
+          if (callState === 'connecting') {
+            setState('connected');
+            setStatus('Aria dinliyor...');
+          }
+        }, 4000);
+      }
+    }, 300);
   }
 };
 
