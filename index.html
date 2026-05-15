@@ -340,152 +340,133 @@
   </div>
 </div>
 
-<!-- ElevenLabs Client SDK -->
-<script src="https://cdn.jsdelivr.net/npm/@elevenlabs/client@1.1.0/dist/index.umd.js"></script>
+<!-- ElevenLabs Client SDK via ESM -->
+<script type="module">
+import { Conversation } from 'https://esm.sh/@elevenlabs/client@1.1.0';
 
-<script>
-  const AGENT_ID = 'agent_9101krknqev9f2wrjyc3h05ha712';
+const AGENT_ID = 'agent_9101krknqev9f2wrjyc3h05ha712';
 
-  let conversation = null;
-  let callState = 'idle'; // idle | connecting | connected
+let conversation = null;
+let callState = 'idle';
 
-  const callBtn   = document.getElementById('callBtn');
-  const chatArea  = document.getElementById('chatArea');
+const callBtn  = document.getElementById('callBtn');
+const chatArea = document.getElementById('chatArea');
 
-  // ── UI helpers ──────────────────────────────
-  function setCallState(state) {
-    callState = state;
-    callBtn.className = 'call-btn' + (state === 'connected' ? ' active' : state === 'connecting' ? ' connecting' : '');
-    if (state === 'idle') {
-      callBtn.innerHTML = phoneSvg() + ' Call';
-    } else if (state === 'connecting') {
-      callBtn.innerHTML = phoneSvg() + ' Bağlanıyor...';
-    } else {
-      callBtn.innerHTML = phoneSvg() + ' Kapat';
+function phoneSvg() {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+    stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12
+      19.79 19.79 0 0 1 1.61 3.38 2 2 0 0 1 3.6 1H6.6a2 2 0 0 1 2 1.72
+      12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.91-.91
+      a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+  </svg>`;
+}
+
+function setCallState(state) {
+  callState = state;
+  callBtn.className = 'call-btn' + (state === 'connected' ? ' active' : state === 'connecting' ? ' connecting' : '');
+  if (state === 'idle')       callBtn.innerHTML = phoneSvg() + ' Call';
+  else if (state === 'connecting') callBtn.innerHTML = phoneSvg() + ' Bağlanıyor...';
+  else                        callBtn.innerHTML = phoneSvg() + ' Kapat';
+}
+
+function addBubble(text, isUser = false) {
+  const div = document.createElement('div');
+  div.className = 'bubble' + (isUser ? ' user' : '');
+  div.textContent = text;
+  chatArea.appendChild(div);
+  chatArea.scrollTop = chatArea.scrollHeight;
+}
+
+function addStatus(msg) {
+  removeStatus();
+  const div = document.createElement('div');
+  div.className = 'status-line';
+  div.id = 'statusLine';
+  div.innerHTML = `<span class="dot"></span> ${msg}`;
+  chatArea.appendChild(div);
+  chatArea.scrollTop = chatArea.scrollHeight;
+}
+
+function removeStatus() {
+  const el = document.getElementById('statusLine');
+  if (el) el.remove();
+}
+
+async function startCall() {
+  setCallState('connecting');
+  addStatus('Bağlanıyor (Lütfen bekleyin)...');
+  try {
+    if (navigator.mediaDevices?.getUserMedia) {
+      await navigator.mediaDevices.getUserMedia({ audio: true });
     }
-  }
-
-  function phoneSvg() {
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12
-        19.79 19.79 0 0 1 1.61 3.38 2 2 0 0 1 3.6 1H6.6a2 2 0 0 1 2 1.72
-        12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.91-.91
-        a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-    </svg>`;
-  }
-
-  function addBubble(text, isUser = false) {
-    const div = document.createElement('div');
-    div.className = 'bubble' + (isUser ? ' user' : '');
-    div.textContent = text;
-    chatArea.appendChild(div);
-    chatArea.scrollTop = chatArea.scrollHeight;
-  }
-
-  function addStatus(msg) {
-    const div = document.createElement('div');
-    div.className = 'status-line';
-    div.innerHTML = `<span class="dot"></span> ${msg}`;
-    div.id = 'statusLine';
-    const old = document.getElementById('statusLine');
-    if (old) old.remove();
-    chatArea.appendChild(div);
-    chatArea.scrollTop = chatArea.scrollHeight;
-  }
-
-  function removeStatus() {
-    const el = document.getElementById('statusLine');
-    if (el) el.remove();
-  }
-
-  // ── Call logic ──────────────────────────────
-  async function toggleCall() {
-    if (callState === 'connected') {
-      await endCall();
-    } else if (callState === 'idle') {
-      await startCall();
-    }
-  }
-
-  async function startCall() {
-    setCallState('connecting');
-    addStatus('Bağlanıyor (Lütfen bekleyin)...');
-
-    try {
-      // Request microphone early for browser stability
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        await navigator.mediaDevices.getUserMedia({ audio: true });
-      }
-
-      conversation = await ElevenLabsClient.Conversation.startSession({
-        agentId: AGENT_ID,
-        onConnect: () => {
-          setCallState('connected');
-          removeStatus();
-          addStatus('Aria dinliyor...');
-        },
-        onDisconnect: () => {
-          setCallState('idle');
-          removeStatus();
-        },
-        onError: (err) => {
-          console.error('ElevenLabs Error:', err);
-          setCallState('idle');
-          removeStatus();
-          addBubble('Bağlantı hatası: ' + (err.message || String(err)));
-        },
-        onMessage: ({ message, source }) => {
-          if (message) addBubble(message, source === 'user');
-        },
-      });
-
-    } catch (err) {
-      console.error('startSession Error:', err);
-      setCallState('idle');
-      removeStatus();
-      const isPermission = err.name === 'NotAllowedError';
-      addBubble(isPermission
-        ? 'Mikrofon izni reddedildi. Lütfen tarayıcı ayarlarından mikrofon iznini aktifleştirin.'
-        : 'Bağlantı kurulamadı: ' + (err.message || 'Bilinmeyen hata.'));
-    }
-  }
-
-  async function endCall() {
-    if (conversation) {
-      await conversation.endSession();
-      conversation = null;
-    }
+    conversation = await Conversation.startSession({
+      agentId: AGENT_ID,
+      onConnect: () => {
+        setCallState('connected');
+        removeStatus();
+        addStatus('Aria dinliyor...');
+      },
+      onDisconnect: () => {
+        setCallState('idle');
+        removeStatus();
+        conversation = null;
+      },
+      onError: (err) => {
+        console.error('ElevenLabs Error:', err);
+        setCallState('idle');
+        removeStatus();
+        addBubble('Bağlantı hatası: ' + (err?.message || String(err)));
+        conversation = null;
+      },
+      onMessage: ({ message, source }) => {
+        if (message) addBubble(message, source === 'user');
+      },
+    });
+  } catch (err) {
+    console.error('startSession Error:', err);
     setCallState('idle');
     removeStatus();
+    addBubble(err.name === 'NotAllowedError'
+      ? 'Mikrofon izni reddedildi. Tarayıcı ayarlarından mikrofon iznini etkinleştirin.'
+      : 'Bağlantı kurulamadı: ' + (err.message || 'Bilinmeyen hata.'));
   }
+}
 
-  // ── Text send ───────────────────────────────
-  function sendText() {
-    const input = document.getElementById('chatInput');
-    const text = input.value.trim();
-    if (!text) return;
-    addBubble(text, true);
-    input.value = '';
-    if (callState !== 'connected') {
-      setTimeout(() => {
-        addBubble('Sesli görüşme başlatmak için "Call" butonuna basın veya mesajınızla sizi bağlayayım.');
-      }, 400);
-    }
+async function endCall() {
+  if (conversation) { await conversation.endSession(); conversation = null; }
+  setCallState('idle');
+  removeStatus();
+}
+
+// Expose to global for onclick attributes
+window.toggleCall = async () => {
+  if (callState === 'connected') await endCall();
+  else if (callState === 'idle') await startCall();
+};
+
+window.sendText = () => {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  addBubble(text, true);
+  input.value = '';
+  if (callState !== 'connected') {
+    setTimeout(() => addBubble('Sesli görüşme için yeşil "Call" butonuna basın.'), 400);
   }
+};
 
-  function handleKey(e) {
-    if (e.key === 'Enter') sendText();
-  }
+window.handleKey = (e) => { if (e.key === 'Enter') window.sendText(); };
 
-  // ── Pills ────────────────────────────────────
-  document.querySelectorAll('.pill').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
-      btn.classList.add('active');
-    });
+// Pills
+document.querySelectorAll('.pill').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
   });
+});
 </script>
+
 
 </body>
 </html>
