@@ -87,20 +87,23 @@
     }
 
     .phone {
-      width: min(560px, 100%);
+      width: min(430px, 100%);
+      height: min(980px, 92vh);
       background: var(--panel);
-      border-radius: 34px;
+      border-radius: 38px;
       border: 2px solid rgba(255, 255, 255, 0.8);
-      padding: 16px;
+      padding: 12px;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
       color: #111;
+      display: flex;
+      flex-direction: column;
     }
 
     .phone-hero {
       position: relative;
       border-radius: 24px;
       overflow: hidden;
-      height: 250px;
+      height: 200px;
       background: #222;
     }
 
@@ -134,17 +137,25 @@
       background: var(--accent);
       color: #05170b;
       font-weight: 700;
-      font-size: 38px;
-      padding: 16px 56px;
+      font-size: 20px;
+      padding: 12px 28px;
       border-radius: 999px;
       cursor: pointer;
+      min-width: 160px;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .call-chip.in-call {
+      background: #e43b3b;
+      color: #fff;
     }
 
     .agent-shell {
-      margin-top: 16px;
+      margin-top: 12px;
       border-radius: 20px;
       background: #f2f2f3;
-      height: 540px;
+      flex: 1;
+      min-height: 0;
       position: relative;
       overflow: hidden;
       border: 1px solid rgba(0, 0, 0, 0.06);
@@ -155,7 +166,7 @@
       inset: 0;
       z-index: 3;
       pointer-events: none;
-      --el-overlay-padding: 10px;
+      --el-overlay-padding: 8px;
       --el-base: #f3f3f4;
       --el-base-hover: #ececef;
       --el-base-active: #e5e5e7;
@@ -235,12 +246,13 @@
       }
 
       .call-chip {
-        font-size: 28px;
-        padding: 12px 40px;
+        font-size: 18px;
+        padding: 10px 22px;
+        min-width: 140px;
       }
 
       .agent-shell {
-        height: 500px;
+        min-height: 520px;
       }
 
       .custom-input input {
@@ -283,6 +295,7 @@
             placement="bottom"
             text-input="false"
             transcript="true"
+            show-agent-status="false"
             default-expanded="true"
             always-expanded="true"
             allow-events="true"
@@ -298,8 +311,72 @@
   </main>
 
   <script>
+    const INTERNAL_STYLE_ID = "muvipho-widget-overrides";
+
     function getWidget() {
       return document.getElementById("phone-agent");
+    }
+
+    function getCallChip() {
+      return document.getElementById("callBtn");
+    }
+
+    function ensureWidgetOverrides(widget) {
+      if (!widget || !widget.shadowRoot) {
+        return;
+      }
+      if (widget.shadowRoot.getElementById(INTERNAL_STYLE_ID)) {
+        return;
+      }
+
+      const style = document.createElement("style");
+      style.id = INTERNAL_STYLE_ID;
+      style.textContent = `
+        button[aria-label="Start a call"],
+        button[aria-label="New call"],
+        button[aria-label="End"],
+        button[aria-label="End call"],
+        button[aria-label="Mute microphone"] {
+          display: none !important;
+        }
+      `;
+      widget.shadowRoot.appendChild(style);
+    }
+
+    function hasActiveEndControl(root) {
+      if (!root) {
+        return false;
+      }
+      return !!root.querySelector(
+        'button[aria-label="End"], button[aria-label="End call"]'
+      );
+    }
+
+    function syncCallChipState() {
+      const widget = getWidget();
+      const callChip = getCallChip();
+      if (!callChip) {
+        return;
+      }
+
+      const inCall = !!widget && !!widget.shadowRoot && hasActiveEndControl(widget.shadowRoot);
+      callChip.classList.toggle("in-call", inCall);
+      callChip.textContent = inCall ? "✕ End" : "☎ Call";
+    }
+
+    function getInternalControlButton(root) {
+      if (!root) {
+        return null;
+      }
+      const endButton = root.querySelector(
+        'button[aria-label="End"], button[aria-label="End call"]'
+      );
+      if (endButton) {
+        return endButton;
+      }
+      return root.querySelector(
+        'button[aria-label="Start a call"], button[aria-label="New call"], button[aria-label*="call" i]'
+      );
     }
 
     function hasTermsModal(widget) {
@@ -316,6 +393,7 @@
         return;
       }
       inputBar.classList.toggle("hidden", hasTermsModal(widget));
+      syncCallChipState();
     }
 
     function observeWidgetState() {
@@ -328,6 +406,7 @@
         if (!widget.shadowRoot) {
           return;
         }
+        ensureWidgetOverrides(widget);
         const observer = new MutationObserver(syncCustomInputVisibility);
         observer.observe(widget.shadowRoot, { childList: true, subtree: true });
         syncCustomInputVisibility();
@@ -359,12 +438,11 @@
           return;
         }
 
-        const callButton = root.querySelector(
-          'button[aria-label*="call" i], button[aria-label="New call"], button[aria-label="Start a call"], button[aria-label="End"]'
-        );
+        const callButton = getInternalControlButton(root);
         if (callButton) {
           callButton.click();
         }
+        syncCallChipState();
       }, 120);
     }
 
@@ -388,6 +466,7 @@
     const textInput = document.getElementById("textInput");
     observeWidgetState();
     syncCustomInputVisibility();
+    syncCallChipState();
 
     textForm.addEventListener("submit", function (event) {
       event.preventDefault();
