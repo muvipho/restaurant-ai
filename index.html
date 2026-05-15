@@ -7,16 +7,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-
   <style>
     :root {
       --accent: #22c55e;
       --accent-hover: #16a34a;
       --text-muted: #888;
     }
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       font-family: 'Inter', sans-serif;
       background: radial-gradient(circle at 10% 20%, #17181c 0%, #0d0d0e 100%);
@@ -25,7 +22,6 @@
       display: flex;
       align-items: center;
     }
-
     .layout {
       display: flex;
       justify-content: space-between;
@@ -34,10 +30,7 @@
       padding: 4rem 10%;
       gap: 4rem;
     }
-
-    /* ── Hero ─────────────────────────────────── */
     .hero { flex: 1; }
-
     .subtitle {
       color: var(--text-muted);
       font-family: monospace;
@@ -45,16 +38,13 @@
       letter-spacing: .1em;
       margin-bottom: 1rem;
     }
-
     .hero h1 {
       font-size: clamp(2rem, 4vw, 3.5rem);
       font-weight: 300;
       line-height: 1.1;
       margin-bottom: 3rem;
     }
-
     .services { list-style: none; display: flex; flex-direction: column; gap: 1.4rem; }
-
     .services li {
       font-size: clamp(1.2rem, 2.5vw, 2.25rem);
       font-weight: 300;
@@ -65,21 +55,9 @@
       transition: opacity .3s, transform .3s;
       cursor: default;
     }
-
     .services li:hover { opacity: 1; transform: translateX(10px); }
-
-    .services li .num {
-      font-size: 1rem;
-      font-family: monospace;
-      color: var(--text-muted);
-    }
-
-    /* ── Widget Card ──────────────────────────── */
-    .widget-wrap {
-      width: 380px;
-      flex-shrink: 0;
-    }
-
+    .services li .num { font-size: 1rem; font-family: monospace; color: var(--text-muted); }
+    .widget-wrap { width: 380px; flex-shrink: 0; }
     .widget {
       background: #f4f4f5;
       border-radius: 1.5rem;
@@ -90,14 +68,7 @@
       color: #18181b;
       min-height: 82vh;
     }
-
-    /* Agent image area */
-    .agent-visual {
-      position: relative;
-      flex-shrink: 0;
-      padding: .5rem;
-    }
-
+    .agent-visual { position: relative; flex-shrink: 0; padding: .5rem; }
     .agent-visual img {
       width: 100%;
       height: 270px;
@@ -105,10 +76,9 @@
       border-radius: 1.15rem;
       display: block;
     }
-
     .brand-tag {
       position: absolute;
-      bottom: 1.4rem;
+      bottom: 4.5rem;
       left: 50%;
       transform: translateX(-50%);
       font-size: .65rem;
@@ -116,8 +86,8 @@
       text-transform: uppercase;
       color: rgba(255,255,255,.7);
       font-weight: 500;
+      white-space: nowrap;
     }
-
     .call-btn {
       position: absolute;
       bottom: 1.5rem;
@@ -135,15 +105,13 @@
       gap: .5rem;
       cursor: pointer;
       box-shadow: 0 4px 18px rgba(34,197,94,.45);
-      transition: background .25s, transform .2s;
+      transition: background .25s;
       white-space: nowrap;
+      font-family: 'Inter', sans-serif;
     }
-
-    .call-btn:hover { background: var(--accent-hover); transform: translateX(-50%) translateY(-2px); }
+    .call-btn:hover { background: var(--accent-hover); }
     .call-btn.active { background: #ef4444; color: #fff; box-shadow: 0 4px 18px rgba(239,68,68,.45); }
-    .call-btn.connecting { background: #f59e0b; color: #000; box-shadow: 0 4px 18px rgba(245,158,11,.4); }
-
-    /* Chat area */
+    .call-btn.connecting { background: #f59e0b; color: #000; box-shadow: 0 4px 18px rgba(245,158,11,.4); cursor: not-allowed; }
     .chat-area {
       flex: 1;
       padding: 1.25rem 1.25rem .5rem;
@@ -152,7 +120,6 @@
       gap: .85rem;
       overflow-y: auto;
     }
-
     .bubble {
       background: #000;
       color: #fff;
@@ -163,32 +130,26 @@
       align-self: flex-start;
       max-width: 90%;
     }
-
     .bubble.user { background: #e4e4e7; color: #18181b; align-self: flex-end; }
-
     .status-line {
       display: flex;
       align-items: center;
       gap: .6rem;
       font-size: .85rem;
-      color: var(--accent-hover);
+      color: #16a34a;
       font-weight: 500;
     }
-
     .dot {
       width: 9px; height: 9px;
       background: var(--accent);
       border-radius: 50%;
       animation: pulse-dot 1.5s infinite;
     }
-
     @keyframes pulse-dot {
       0%   { transform: scale(.9); box-shadow: 0 0 0 0 rgba(34,197,94,.7); }
       70%  { transform: scale(1);  box-shadow: 0 0 0 8px rgba(34,197,94,0); }
       100% { transform: scale(.9); box-shadow: 0 0 0 0 rgba(34,197,94,0); }
     }
-
-    /* Footer */
     .widget-footer {
       padding: 1rem 1.25rem 1.25rem;
       background: #f4f4f5;
@@ -196,9 +157,7 @@
       flex-direction: column;
       gap: .85rem;
     }
-
     .pills { display: flex; gap: .5rem; }
-
     .pill {
       font-size: .72rem;
       padding: .35rem .75rem;
@@ -208,11 +167,10 @@
       color: #52525b;
       cursor: pointer;
       transition: background .2s;
+      font-family: 'Inter', sans-serif;
     }
-
     .pill:hover { background: #e4e4e7; }
     .pill.active { background: #000; color: #fff; border-color: #000; }
-
     .input-row {
       display: flex;
       align-items: center;
@@ -220,19 +178,16 @@
       border-radius: 2rem;
       padding: .2rem .2rem .2rem 1.2rem;
     }
-
     .input-row input {
       flex: 1;
       border: none;
       background: transparent;
-      font-family: inherit;
+      font-family: 'Inter', sans-serif;
       font-size: .9rem;
       color: #18181b;
       outline: none;
     }
-
     .input-row input::placeholder { color: #a1a1aa; }
-
     .send-btn {
       background: #18181b;
       border: none;
@@ -245,9 +200,7 @@
       cursor: pointer;
       transition: opacity .2s;
     }
-
     .send-btn:hover { opacity: .75; }
-
     .powered {
       text-align: center;
       font-size: .62rem;
@@ -255,10 +208,7 @@
       text-transform: uppercase;
       letter-spacing: .06em;
     }
-
     .powered b { color: #52525b; }
-
-    /* Responsive */
     @media (max-width: 900px) {
       .layout { flex-direction: column; padding: 2rem; }
       .hero h1 { font-size: 2rem; }
@@ -268,10 +218,8 @@
   </style>
 </head>
 <body>
-
 <div class="layout">
-
-  <!-- ── Left: Services ── -->
+  <!-- Hero -->
   <div class="hero">
     <p class="subtitle">/ services /</p>
     <h1>From planning to<br>personalized experiences</h1>
@@ -286,187 +234,168 @@
     </ul>
   </div>
 
-  <!-- ── Right: Widget ── -->
+  <!-- Widget -->
   <div class="widget-wrap">
     <div class="widget">
-
-      <!-- Agent visual + Call button -->
-      <div class="agent-visual" id="agentVisual">
+      <!-- Agent photo + Call button -->
+      <div class="agent-visual">
         <img
           src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800"
           alt="Aria – Muvipho AI Agent"
         >
-        <span class="brand-tag">Muvipho</span>
-        <button class="call-btn" id="callBtn" onclick="toggleCall()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12
-              19.79 19.79 0 0 1 1.61 3.38 2 2 0 0 1 3.6 1H6.6a2 2 0 0 1 2 1.72
-              12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.91-.91
-              a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+        <span class="brand-tag">MUVIPHO</span>
+        <button class="call-btn" id="callBtn" onclick="handleCallClick()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.38 2 2 0 0 1 3.6 1H6.6a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
           </svg>
-          Call
+          <span id="callLabel">Call</span>
         </button>
       </div>
 
-      <!-- Chat messages -->
+      <!-- Chat -->
       <div class="chat-area" id="chatArea">
-        <div class="bubble" id="greetBubble">
-          Hi, I'm Aria, the AI Agent of Muvipho. How can I help you today?
-        </div>
+        <div class="bubble">Hi, I'm Aria, the AI Agent of Muvipho. How can I help you today?</div>
       </div>
 
-      <!-- Footer: pills + input -->
+      <!-- Footer -->
       <div class="widget-footer">
         <div class="pills">
-          <button class="pill active">AI Agents</button>
-          <button class="pill">Features</button>
-          <button class="pill">Industries</button>
+          <button class="pill active" onclick="selectPill(this)">AI Agents</button>
+          <button class="pill" onclick="selectPill(this)">Features</button>
+          <button class="pill" onclick="selectPill(this)">Industries</button>
         </div>
         <div class="input-row">
-          <input id="chatInput" type="text" placeholder="Start call or write message" onkeydown="handleKey(event)">
-          <button class="send-btn" onclick="sendText()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
-              fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="22" y1="2" x2="11" y2="13"/>
-              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          <input id="chatInput" type="text" placeholder="Start call or write message" onkeydown="if(event.key==='Enter')handleSend()">
+          <button class="send-btn" onclick="handleSend()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
             </svg>
           </button>
         </div>
         <p class="powered">POWERED BY <b>MUVIPHO</b></p>
       </div>
-
     </div>
   </div>
 </div>
 
-<!-- ElevenLabs Client SDK via ESM -->
 <script type="module">
-import { Conversation } from 'https://esm.sh/@elevenlabs/client@1.1.0';
+// ── ElevenLabs SDK via ESM (latest stable) ──────────────────────────────────
+import { Conversation } from 'https://esm.sh/@elevenlabs/client@1.7.0';
 
 const AGENT_ID = 'agent_9101krknqev9f2wrjyc3h05ha712';
 
-let conversation = null;
-let callState = 'idle';
+let conv        = null;
+let callState   = 'idle'; // idle | connecting | connected
 
-const callBtn  = document.getElementById('callBtn');
-const chatArea = document.getElementById('chatArea');
+const btn       = document.getElementById('callBtn');
+const btnLabel  = document.getElementById('callLabel');
+const chatArea  = document.getElementById('chatArea');
 
-function phoneSvg() {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-    stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12
-      19.79 19.79 0 0 1 1.61 3.38 2 2 0 0 1 3.6 1H6.6a2 2 0 0 1 2 1.72
-      12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.91-.91
-      a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-  </svg>`;
+// ── helpers ─────────────────────────────────────────────────────────────────
+function setState(s) {
+  callState = s;
+  btn.className = 'call-btn' + (s === 'connected' ? ' active' : s === 'connecting' ? ' connecting' : '');
+  if (s === 'idle')       { btnLabel.textContent = 'Call'; }
+  else if (s === 'connecting') { btnLabel.textContent = 'Bağlanıyor...'; }
+  else                    { btnLabel.textContent = 'Kapat'; }
 }
 
-function setCallState(state) {
-  callState = state;
-  callBtn.className = 'call-btn' + (state === 'connected' ? ' active' : state === 'connecting' ? ' connecting' : '');
-  if (state === 'idle')       callBtn.innerHTML = phoneSvg() + ' Call';
-  else if (state === 'connecting') callBtn.innerHTML = phoneSvg() + ' Bağlanıyor...';
-  else                        callBtn.innerHTML = phoneSvg() + ' Kapat';
-}
-
-function addBubble(text, isUser = false) {
-  const div = document.createElement('div');
-  div.className = 'bubble' + (isUser ? ' user' : '');
-  div.textContent = text;
-  chatArea.appendChild(div);
+function bubble(txt, isUser = false) {
+  const d = document.createElement('div');
+  d.className = 'bubble' + (isUser ? ' user' : '');
+  d.textContent = txt;
+  chatArea.appendChild(d);
   chatArea.scrollTop = chatArea.scrollHeight;
 }
 
-function addStatus(msg) {
-  removeStatus();
-  const div = document.createElement('div');
-  div.className = 'status-line';
-  div.id = 'statusLine';
-  div.innerHTML = `<span class="dot"></span> ${msg}`;
-  chatArea.appendChild(div);
+function setStatus(msg) {
+  let el = document.getElementById('statusLine');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'statusLine';
+    el.className = 'status-line';
+    chatArea.appendChild(el);
+  }
+  el.innerHTML = msg ? `<span class="dot"></span> ${msg}` : '';
+  if (!msg) el.remove();
   chatArea.scrollTop = chatArea.scrollHeight;
 }
 
-function removeStatus() {
-  const el = document.getElementById('statusLine');
-  if (el) el.remove();
-}
-
+// ── call logic ───────────────────────────────────────────────────────────────
 async function startCall() {
-  setCallState('connecting');
-  addStatus('Bağlanıyor (Lütfen bekleyin)...');
+  setState('connecting');
+  setStatus('Bağlanıyor (Lütfen bekleyin)...');
   try {
+    // Ensure mic permission first
     if (navigator.mediaDevices?.getUserMedia) {
       await navigator.mediaDevices.getUserMedia({ audio: true });
     }
-    conversation = await Conversation.startSession({
+
+    conv = await Conversation.startSession({
       agentId: AGENT_ID,
+
       onConnect: () => {
-        setCallState('connected');
-        removeStatus();
-        addStatus('Aria dinliyor...');
+        console.log('[Muvipho] Connected ✓');
+        setState('connected');
+        setStatus('Aria dinliyor...');
       },
-      onDisconnect: () => {
-        setCallState('idle');
-        removeStatus();
-        conversation = null;
+
+      onDisconnect: (detail) => {
+        console.log('[Muvipho] Disconnected', detail);
+        setState('idle');
+        setStatus(null);
+        conv = null;
       },
+
       onError: (err) => {
-        console.error('ElevenLabs Error:', err);
-        setCallState('idle');
-        removeStatus();
-        addBubble('Bağlantı hatası: ' + (err?.message || String(err)));
-        conversation = null;
+        console.error('[Muvipho] Error:', err);
+        setState('idle');
+        setStatus(null);
+        bubble('Bağlantı hatası: ' + (err?.message || String(err)));
+        conv = null;
       },
+
       onMessage: ({ message, source }) => {
-        if (message) addBubble(message, source === 'user');
+        console.log('[Muvipho] Message', source, message);
+        if (message) bubble(message, source === 'user');
       },
     });
+
   } catch (err) {
-    console.error('startSession Error:', err);
-    setCallState('idle');
-    removeStatus();
-    addBubble(err.name === 'NotAllowedError'
-      ? 'Mikrofon izni reddedildi. Tarayıcı ayarlarından mikrofon iznini etkinleştirin.'
+    console.error('[Muvipho] startSession threw:', err);
+    setState('idle');
+    setStatus(null);
+    bubble(err.name === 'NotAllowedError'
+      ? 'Mikrofon izni verilmedi. Tarayıcı adres çubuğundaki kilit simgesine tıklayıp mikrofona izin verin.'
       : 'Bağlantı kurulamadı: ' + (err.message || 'Bilinmeyen hata.'));
   }
 }
 
 async function endCall() {
-  if (conversation) { await conversation.endSession(); conversation = null; }
-  setCallState('idle');
-  removeStatus();
+  if (conv) { try { await conv.endSession(); } catch (_) {} }
+  conv = null;
+  setState('idle');
+  setStatus(null);
 }
 
-// Expose to global for onclick attributes
-window.toggleCall = async () => {
-  if (callState === 'connected') await endCall();
-  else if (callState === 'idle') await startCall();
+// Exposed to inline onclick
+window.handleCallClick = () => {
+  if (callState === 'connected') endCall();
+  else if (callState === 'idle') startCall();
 };
 
-window.sendText = () => {
-  const input = document.getElementById('chatInput');
-  const text = input.value.trim();
-  if (!text) return;
-  addBubble(text, true);
-  input.value = '';
-  if (callState !== 'connected') {
-    setTimeout(() => addBubble('Sesli görüşme için yeşil "Call" butonuna basın.'), 400);
-  }
+window.handleSend = () => {
+  const inp = document.getElementById('chatInput');
+  const txt = inp.value.trim();
+  if (!txt) return;
+  bubble(txt, true);
+  inp.value = '';
 };
 
-window.handleKey = (e) => { if (e.key === 'Enter') window.sendText(); };
-
-// Pills
-document.querySelectorAll('.pill').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
-    btn.classList.add('active');
-  });
-});
+window.selectPill = (el) => {
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+};
 </script>
-
-
 </body>
 </html>
