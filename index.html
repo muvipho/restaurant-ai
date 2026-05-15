@@ -184,6 +184,13 @@
       border-radius: 999px;
       padding: 8px 10px 8px 16px;
       border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .custom-input.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(8px);
     }
 
     .custom-input input {
@@ -295,6 +302,44 @@
       return document.getElementById("phone-agent");
     }
 
+    function hasTermsModal(widget) {
+      if (!widget || !widget.shadowRoot) {
+        return false;
+      }
+      return !!widget.shadowRoot.querySelector(".terms, [class*='terms']");
+    }
+
+    function syncCustomInputVisibility() {
+      const widget = getWidget();
+      const inputBar = document.getElementById("textForm");
+      if (!inputBar) {
+        return;
+      }
+      inputBar.classList.toggle("hidden", hasTermsModal(widget));
+    }
+
+    function observeWidgetState() {
+      const widget = getWidget();
+      if (!widget) {
+        return;
+      }
+
+      function attachObserver() {
+        if (!widget.shadowRoot) {
+          return;
+        }
+        const observer = new MutationObserver(syncCustomInputVisibility);
+        observer.observe(widget.shadowRoot, { childList: true, subtree: true });
+        syncCustomInputVisibility();
+      }
+
+      if (widget.shadowRoot) {
+        attachObserver();
+      } else {
+        setTimeout(attachObserver, 600);
+      }
+    }
+
     function startCallFromCustomButton() {
       const widget = getWidget();
       if (!widget) {
@@ -341,6 +386,8 @@
 
     const textForm = document.getElementById("textForm");
     const textInput = document.getElementById("textInput");
+    observeWidgetState();
+    syncCustomInputVisibility();
 
     textForm.addEventListener("submit", function (event) {
       event.preventDefault();
