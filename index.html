@@ -102,7 +102,8 @@
       flex-direction: column;
       overflow: hidden;
       color: #18181b;
-      min-height: 82vh;
+      height: min(82vh, 920px);
+      max-height: min(82vh, 920px);
     }
 
     .agent-visual {
@@ -186,6 +187,8 @@
       gap: .85rem;
       overflow-y: auto;
       min-height: 0;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
     }
 
     .bubble {
@@ -343,6 +346,11 @@
         width: 100%;
         max-width: 420px;
         align-self: center;
+      }
+
+      .widget {
+        height: min(84svh, 860px);
+        max-height: min(84svh, 860px);
       }
     }
   </style>
