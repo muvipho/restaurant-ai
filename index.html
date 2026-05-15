@@ -92,15 +92,17 @@
       margin-bottom:18px;
     }
 
-    .call{
-      background:#18c965;
-      color:#071b0f;
-      border:none;
-      border-radius:999px;
-      padding:16px 52px;
-      font-size:18px;
-      font-weight:bold;
-    }
+   .call-button{
+  background:#18c965;
+  color:#071b0f;
+  text-decoration:none;
+  border:none;
+  border-radius:999px;
+  padding:16px 52px;
+  font-size:18px;
+  font-weight:bold;
+  display:inline-block;
+}
 
     .message{
       background:#050505;
@@ -172,7 +174,11 @@
     <div class="phone">
       <div class="hero">
         <div class="brand">MUVIPHO</div>
-        <button class="call">☎ Call</button>
+       <a href="https://elevenlabs.io/app/talk-to?agent_id=agent_9101krknqev9f2wrjyc3h05ha712"
+   target="_blank"
+   class="call-button">
+   ☎ Call
+</a>
       </div>
 
       <div class="message">
@@ -180,9 +186,22 @@
         How can I help you today?
       </div>
 
-      <div class="widget-box">
-        <elevenlabs-convai agent-id="agent_9101krknqev9f2wrjyc3h05ha712"></elevenlabs-convai>
-      </div>
+    <div class="widget-box">
+
+  <iframe
+    src="https://elevenlabs.io/app/talk-to?agent_id=agent_9101krknqev9f2wrjyc3h05ha712"
+    width="100%"
+    height="420"
+    frameborder="0"
+    style="
+      border:none;
+      border-radius:20px;
+      overflow:hidden;
+      background:white;
+    ">
+  </iframe>
+
+</div>
 
       <div class="tags">
         <div class="tag">AI Agents</div>
