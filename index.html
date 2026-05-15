@@ -3,236 +3,355 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Muvipho AI Concierge</title>
-
-  <script
-    src="https://unpkg.com/@elevenlabs/convai-widget-embed"
-    async
-    type="text/javascript">
-  </script>
-
+  <title>Muvipho Restaurant AI</title>
+  <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
   <style>
-    *{box-sizing:border-box}
-
-    body{
-      margin:0;
-      min-height:100vh;
-      background:radial-gradient(circle at top right,#242424,#090909 55%);
-      color:white;
-      font-family:Arial, Helvetica, sans-serif;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:60px;
+    :root {
+      --bg: #07090f;
+      --panel: #d9d9db;
+      --text: #f0f0f0;
+      --muted: #a5a5a8;
+      --accent: #21d06f;
     }
 
-    .page{
-      width:100%;
-      max-width:1200px;
-      display:grid;
-      grid-template-columns:1.2fr .8fr;
-      gap:70px;
-      align-items:center;
+    * {
+      box-sizing: border-box;
     }
 
-    .label{
-      letter-spacing:8px;
-      color:#999;
-      margin-bottom:30px;
-    }
-
-    h1{
-      font-size:58px;
-      line-height:1.08;
-      font-weight:300;
-      margin:0 0 50px;
-      color:#e8e8e8;
-    }
-
-    .services{
-      display:grid;
-      gap:24px;
-      color:#bdbdbd;
-      font-size:34px;
-      font-weight:300;
-    }
-
-    .services span{
-      font-size:16px;
-      color:#777;
-      margin-right:20px;
-    }
-
-    .phone{
-      background:#f4f4f4;
-      color:#111;
-      border-radius:28px;
-      padding:14px;
-      box-shadow:0 30px 80px rgba(0,0,0,.45);
-      min-height:720px;
-    }
-
-    .hero{
-      height:260px;
-      border-radius:22px;
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
       background:
-        linear-gradient(to bottom,rgba(0,0,0,.1),rgba(0,0,0,.55)),
-        url('https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=1200&auto=format&fit=crop');
-      background-size:cover;
-      background-position:center;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:end;
-      padding:24px;
-      color:white;
-      text-align:center;
+        radial-gradient(circle at 15% 20%, rgba(38, 42, 56, 0.45), transparent 45%),
+        radial-gradient(circle at 85% 40%, rgba(60, 64, 79, 0.32), transparent 38%),
+        #080b12;
+      color: var(--text);
     }
 
-    .brand{
-      letter-spacing:4px;
-      font-size:14px;
-      font-weight:bold;
-      margin-bottom:18px;
+    .layout {
+      width: min(1300px, 100% - 48px);
+      margin: 24px auto;
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 28px;
+      align-items: start;
     }
 
-    .call-button{
-      background:#18c965;
-      color:#071b0f;
-      text-decoration:none;
-      border:none;
-      border-radius:999px;
-      padding:16px 52px;
-      font-size:18px;
-      font-weight:bold;
-      display:inline-block;
-      cursor:pointer;
+    .left {
+      padding: 24px 8px;
     }
 
-    .message{
-      background:#050505;
-      color:white;
-      border-radius:12px;
-      padding:20px;
-      margin:34px 14px 22px;
-      line-height:1.5;
-      font-size:16px;
+    .eyebrow {
+      letter-spacing: 0.4em;
+      color: #9b9ca0;
+      margin: 0 0 18px;
+      font-size: 30px;
+      opacity: 0.9;
     }
 
-    .widget-box{
-      margin:20px 14px;
-      border-radius:22px;
-      overflow:hidden;
-      background:#ffffff;
-      padding:10px;
-      min-height:320px;
+    .title {
+      font-size: clamp(42px, 5.2vw, 86px);
+      line-height: 1.06;
+      letter-spacing: -0.02em;
+      margin: 0 0 24px;
+      max-width: 14ch;
     }
 
-    .input-demo{
-      margin:30px 14px 10px;
-      background:#3a3a3a;
-      color:#aaa;
-      border-radius:999px;
-      padding:16px 18px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      font-size:16px;
+    .service-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 18px;
     }
 
-    .input-demo button{
-      background:none;
-      border:none;
-      color:#aaa;
-      font-size:26px;
-      cursor:pointer;
+    .service-list li {
+      font-size: clamp(27px, 2.1vw, 40px);
+      color: #b8b9bc;
+      display: flex;
+      gap: 16px;
+      align-items: baseline;
     }
 
-    .tags{
-      display:flex;
-      gap:10px;
-      margin:24px 14px 16px;
-      flex-wrap:wrap;
+    .service-list .num {
+      color: #8c8d92;
+      font-size: 0.65em;
+      min-width: 1.5em;
     }
 
-    .tag{
-      border:1px solid #ddd;
-      border-radius:999px;
-      padding:8px 14px;
-      font-size:13px;
-      background:white;
+    .phone-wrap {
+      display: flex;
+      justify-content: center;
+      padding-top: 8px;
     }
 
-    .powered{
-      text-align:center;
-      color:#999;
-      font-size:12px;
-      letter-spacing:2px;
-      margin-top:30px;
+    .phone {
+      width: min(560px, 100%);
+      background: var(--panel);
+      border-radius: 34px;
+      border: 2px solid rgba(255, 255, 255, 0.8);
+      padding: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+      color: #111;
     }
 
-    @media(max-width:900px){
-      body{padding:30px 18px}
-      .page{grid-template-columns:1fr}
-      h1{font-size:42px}
-      .services{font-size:26px}
-      .phone{min-height:auto}
+    .phone-hero {
+      position: relative;
+      border-radius: 24px;
+      overflow: hidden;
+      height: 250px;
+      background: #222;
+    }
+
+    .phone-hero img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(0.86);
+    }
+
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      align-content: center;
+      justify-items: center;
+      gap: 14px;
+      color: #fff;
+      padding: 20px;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .brand {
+      letter-spacing: 0.22em;
+      font-size: 36px;
+      font-weight: 700;
+    }
+
+    .call-chip {
+      border: 0;
+      background: var(--accent);
+      color: #05170b;
+      font-weight: 700;
+      font-size: 38px;
+      padding: 16px 56px;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+
+    .agent-shell {
+      margin-top: 16px;
+      border-radius: 20px;
+      background: #f2f2f3;
+      height: 540px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    #phone-agent {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      pointer-events: none;
+      --el-overlay-padding: 10px;
+      --el-base: #f3f3f4;
+      --el-base-hover: #ececef;
+      --el-base-active: #e5e5e7;
+      --el-base-border: #d2d2d5;
+      --el-base-primary: #121212;
+      --el-base-subtle: #6d6d71;
+      --el-accent: #171717;
+      --el-accent-hover: #2a2a2a;
+      --el-accent-active: #3a3a3a;
+      --el-accent-primary: #f3f3f4;
+      --el-button-radius: 18px;
+      --el-input-radius: 16px;
+      --el-sheet-radius: 18px;
+    }
+
+    .custom-input {
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      z-index: 5;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      background: #3b3b3d;
+      border-radius: 999px;
+      padding: 8px 10px 8px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .custom-input input {
+      border: 0;
+      background: transparent;
+      color: #e7e7e8;
+      font-size: 24px;
+      outline: none;
+      width: 100%;
+    }
+
+    .custom-input input::placeholder {
+      color: #adadb0;
+    }
+
+    .send-btn {
+      border: 0;
+      background: transparent;
+      color: #bebec2;
+      font-size: 36px;
+      line-height: 1;
+      cursor: pointer;
+      padding: 0 8px;
+    }
+
+    @media (max-width: 1080px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .left {
+        order: 2;
+        padding-top: 6px;
+      }
+
+      .phone-wrap {
+        order: 1;
+      }
+
+      .brand {
+        font-size: 28px;
+      }
+
+      .call-chip {
+        font-size: 28px;
+        padding: 12px 40px;
+      }
+
+      .agent-shell {
+        height: 500px;
+      }
+
+      .custom-input input {
+        font-size: 18px;
+      }
     }
   </style>
 </head>
-
 <body>
+  <main class="layout">
+    <section class="left">
+      <p class="eyebrow">/ SERVICES /</p>
+      <h1 class="title">From planning to personalized experiences</h1>
+      <ul class="service-list">
+        <li><span class="num">01</span> /Pre-Arrival Assistance/</li>
+        <li><span class="num">02</span> /Dining Recommendations/</li>
+        <li><span class="num">03</span> /Reservations/</li>
+        <li><span class="num">04</span> /Menu Information/</li>
+        <li><span class="num">05</span> /Event Information/</li>
+        <li><span class="num">06</span> /Feedback Management/</li>
+        <li><span class="num">07</span> /Local Attractions/</li>
+      </ul>
+    </section>
 
-  <div class="page">
-    <div>
-      <div class="label">/ SERVICES /</div>
+    <section class="phone-wrap">
+      <div class="phone">
+        <div class="phone-hero">
+          <img src="https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=1200&q=80" alt="Restaurant" />
+          <div class="hero-overlay">
+            <div class="brand">MUVIPHO</div>
+            <button id="callBtn" class="call-chip" type="button">☎ Call</button>
+          </div>
+        </div>
 
-      <h1>From planning to<br>personalized experiences</h1>
+        <div class="agent-shell">
+          <elevenlabs-convai
+            id="phone-agent"
+            agent-id="agent_9101krknqev9f2wrjyc3h05ha712"
+            variant="full"
+            placement="bottom"
+            text-input="false"
+            transcript="true"
+            default-expanded="true"
+            always-expanded="true"
+            allow-events="true"
+          ></elevenlabs-convai>
 
-      <div class="services">
-        <div><span>01</span>/Pre-Arrival Assistance/</div>
-        <div><span>02</span>/Dining Recommendations/</div>
-        <div><span>03</span>/Reservations/</div>
-        <div><span>04</span>/Menu Information/</div>
-        <div><span>05</span>/Event Information/</div>
-        <div><span>06</span>/Feedback Management/</div>
-        <div><span>07</span>/Local Attractions/</div>
+          <form id="textForm" class="custom-input" autocomplete="off">
+            <input id="textInput" type="text" placeholder="Start call or write message" />
+            <button class="send-btn" type="submit" aria-label="Send">➤</button>
+          </form>
+        </div>
       </div>
-    </div>
+    </section>
+  </main>
 
-    <div class="phone">
-      <div class="hero">
-        <div class="brand">MUVIPHO</div>
-        <button class="call-button" onclick="document.querySelector('.widget-box').scrollIntoView({behavior:'smooth'});">
-          ☎ Call
-        </button>
-      </div>
+  <script>
+    function getWidget() {
+      return document.getElementById("phone-agent");
+    }
 
-      <div class="message">
-        Hi, I'm Aria, the AI Agent of Muvipho.<br>
-        How can I help you today?
-      </div>
+    function startCallFromCustomButton() {
+      const widget = getWidget();
+      if (!widget) {
+        return;
+      }
 
-      <div class="widget-box">
-        <elevenlabs-convai
-          agent-id="agent_9101krknqev9f2wrjyc3h05ha712">
-        </elevenlabs-convai>
-      </div>
+      widget.dispatchEvent(
+        new CustomEvent("elevenlabs-agent:expand", {
+          bubbles: true,
+          detail: { action: "expand" }
+        })
+      );
 
-      <div class="input-demo">
-        <span>Start call or write message</span>
-        <button onclick="document.querySelector('.widget-box').scrollIntoView({behavior:'smooth'});">➤</button>
-      </div>
+      setTimeout(function () {
+        const root = widget.shadowRoot;
+        if (!root) {
+          return;
+        }
 
-      <div class="tags">
-        <div class="tag">AI Agents</div>
-        <div class="tag">Features</div>
-        <div class="tag">Industries</div>
-      </div>
+        const callButton = root.querySelector(
+          'button[aria-label*="call" i], button[aria-label="New call"], button[aria-label="Start a call"], button[aria-label="End"]'
+        );
+        if (callButton) {
+          callButton.click();
+        }
+      }, 120);
+    }
 
-      <div class="powered">POWERED BY <b>MUVIPHO</b></div>
-    </div>
-  </div>
+    function sendMessageToAgent(text) {
+      const widget = getWidget();
+      if (!widget || !text) {
+        return;
+      }
 
+      widget.dispatchEvent(
+        new CustomEvent("elevenlabs-agent:user-message", {
+          bubbles: true,
+          detail: { message: text }
+        })
+      );
+    }
+
+    document.getElementById("callBtn").addEventListener("click", startCallFromCustomButton);
+
+    const textForm = document.getElementById("textForm");
+    const textInput = document.getElementById("textInput");
+
+    textForm.addEventListener("submit", function (event) {
+      event.preventDefault();
+      const message = textInput.value.trim();
+      if (!message) {
+        return;
+      }
+
+      sendMessageToAgent(message);
+      textInput.value = "";
+    });
+  </script>
 </body>
 </html>
