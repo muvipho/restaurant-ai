@@ -416,6 +416,8 @@
     const AGENT_ID = 'agent_9101krknqev9f2wrjyc3h05ha712';
     let selectedInputDeviceId = undefined;
     let vadWatchTimer = null;
+    let micRecoverTimer = null;
+    let vadSeenInSession = false;
 
     function setState(next) {
       callState = next;
@@ -456,6 +458,35 @@
       chatArea.scrollTop = chatArea.scrollHeight;
     }
 
+    async function getBestInputDeviceId() {
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const inputs = devices.filter(d => d.kind === 'audioinput');
+        if (!inputs.length) return undefined;
+        const defaultDevice = inputs.find(d => d.deviceId === 'default');
+        return (defaultDevice || inputs[0]).deviceId;
+      } catch (_err) {
+        return undefined;
+      }
+    }
+
+    async function recoverMicrophoneInput() {
+      if (!conversation || typeof conversation.changeInputDevice !== 'function') {
+        return;
+      }
+      try {
+        const nextDeviceId = await getBestInputDeviceId();
+        await conversation.changeInputDevice({
+          inputDeviceId: nextDeviceId || selectedInputDeviceId,
+          format: 'pcm',
+          sampleRate: 16000
+        });
+        setStatusLine('Mikrofon yeniden baglandi, tekrar konusun...');
+      } catch (error) {
+        console.error('[Muvipho] changeInputDevice failed:', error);
+      }
+    }
+
     function handleConversationMessage(message) {
       if (!message || typeof message.message !== 'string' || !message.message.trim()) {
         return;
@@ -468,6 +499,7 @@
     async function startConversation() {
       setState('connecting');
       setStatusLine('Baglaniyor (Lutfen bekleyin)...');
+      vadSeenInSession = false;
 
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -475,6 +507,9 @@
         selectedInputDeviceId = firstTrack && firstTrack.getSettings
           ? firstTrack.getSettings().deviceId
           : undefined;
+        if (!selectedInputDeviceId) {
+          selectedInputDeviceId = await getBestInputDeviceId();
+        }
         stream.getTracks().forEach(t => t.stop());
       } catch (_err) {
         setState('idle');
@@ -498,9 +533,17 @@
             setState('connected');
             setStatusLine('Aria dinliyor...');
             if (vadWatchTimer) clearTimeout(vadWatchTimer);
+            if (micRecoverTimer) clearTimeout(micRecoverTimer);
             vadWatchTimer = setTimeout(() => {
-              setStatusLine('Aria dinliyor... (Mikrofon sessiz gorunuyor)');
+              if (!vadSeenInSession) {
+                setStatusLine('Aria dinliyor... (Mikrofon sessiz gorunuyor)');
+              }
             }, 7000);
+            micRecoverTimer = setTimeout(async () => {
+              if (!vadSeenInSession && callState === 'connected') {
+                await recoverMicrophoneInput();
+              }
+            }, 9000);
           },
           onDisconnect: () => {
             setState('idle');
@@ -510,13 +553,22 @@
               clearTimeout(vadWatchTimer);
               vadWatchTimer = null;
             }
+            if (micRecoverTimer) {
+              clearTimeout(micRecoverTimer);
+              micRecoverTimer = null;
+            }
           },
           onMessage: handleConversationMessage,
           onVadScore: ({ vadScore }) => {
             if (typeof vadScore === 'number' && vadScore > 0.45) {
+              vadSeenInSession = true;
               if (vadWatchTimer) {
                 clearTimeout(vadWatchTimer);
                 vadWatchTimer = null;
+              }
+              if (micRecoverTimer) {
+                clearTimeout(micRecoverTimer);
+                micRecoverTimer = null;
               }
               if (callState === 'connected') {
                 setStatusLine('Sesiniz algilandi, Aria isliyor...');
@@ -532,6 +584,10 @@
             if (vadWatchTimer) {
               clearTimeout(vadWatchTimer);
               vadWatchTimer = null;
+            }
+            if (micRecoverTimer) {
+              clearTimeout(micRecoverTimer);
+              micRecoverTimer = null;
             }
           },
           onStatusChange: ({ status }) => {
@@ -574,6 +630,14 @@
           setState('idle');
           setStatusLine(null);
           conversation = null;
+          if (vadWatchTimer) {
+            clearTimeout(vadWatchTimer);
+            vadWatchTimer = null;
+          }
+          if (micRecoverTimer) {
+            clearTimeout(micRecoverTimer);
+            micRecoverTimer = null;
+          }
         }
         return;
       }
