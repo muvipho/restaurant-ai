@@ -5,7 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Muvipho AI Concierge</title>
 
-  <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
+  <script
+    src="https://unpkg.com/@elevenlabs/convai-widget-embed"
+    async
+    type="text/javascript">
+  </script>
 
   <style>
     *{box-sizing:border-box}
@@ -92,37 +96,62 @@
       margin-bottom:18px;
     }
 
-   .call-button{
-  background:#18c965;
-  color:#071b0f;
-  text-decoration:none;
-  border:none;
-  border-radius:999px;
-  padding:16px 52px;
-  font-size:18px;
-  font-weight:bold;
-  display:inline-block;
-}
+    .call-button{
+      background:#18c965;
+      color:#071b0f;
+      text-decoration:none;
+      border:none;
+      border-radius:999px;
+      padding:16px 52px;
+      font-size:18px;
+      font-weight:bold;
+      display:inline-block;
+      cursor:pointer;
+    }
 
     .message{
       background:#050505;
       color:white;
       border-radius:12px;
       padding:20px;
-      margin:34px 14px;
+      margin:34px 14px 22px;
       line-height:1.5;
       font-size:16px;
     }
 
     .widget-box{
       margin:20px 14px;
-      min-height:230px;
+      border-radius:22px;
+      overflow:hidden;
+      background:#ffffff;
+      padding:10px;
+      min-height:320px;
+    }
+
+    .input-demo{
+      margin:30px 14px 10px;
+      background:#3a3a3a;
+      color:#aaa;
+      border-radius:999px;
+      padding:16px 18px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      font-size:16px;
+    }
+
+    .input-demo button{
+      background:none;
+      border:none;
+      color:#aaa;
+      font-size:26px;
+      cursor:pointer;
     }
 
     .tags{
       display:flex;
       gap:10px;
-      margin:40px 14px 16px;
+      margin:24px 14px 16px;
       flex-wrap:wrap;
     }
 
@@ -141,24 +170,7 @@
       letter-spacing:2px;
       margin-top:30px;
     }
-.input-demo{
-  margin:30px 14px 10px;
-  background:#3a3a3a;
-  color:#aaa;
-  border-radius:999px;
-  padding:16px 18px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  font-size:16px;
-}
 
-.input-demo button{
-  background:none;
-  border:none;
-  color:#aaa;
-  font-size:26px;
-}
     @media(max-width:900px){
       body{padding:30px 18px}
       .page{grid-template-columns:1fr}
@@ -166,7 +178,6 @@
       .services{font-size:26px}
       .phone{min-height:auto}
     }
-    
   </style>
 </head>
 
@@ -192,9 +203,9 @@
     <div class="phone">
       <div class="hero">
         <div class="brand">MUVIPHO</div>
-       <button class="call-button" onclick="alert('Please use the voice widget at the bottom-right to start the AI call.')">
-  ☎ Call
-</button>
+        <button class="call-button" onclick="document.querySelector('.widget-box').scrollIntoView({behavior:'smooth'});">
+          ☎ Call
+        </button>
       </div>
 
       <div class="message">
@@ -202,26 +213,17 @@
         How can I help you today?
       </div>
 
-    <div class="widget-box">
+      <div class="widget-box">
+        <elevenlabs-convai
+          agent-id="agent_9101krknqev9f2wrjyc3h05ha712">
+        </elevenlabs-convai>
+      </div>
 
-  <iframe
-    src="https://elevenlabs.io/app/talk-to?agent_id=agent_9101krknqev9f2wrjyc3h05ha712"
-    width="100%"
-    height="420"
-    frameborder="0"
-    style="
-      border:none;
-      border-radius:20px;
-      overflow:hidden;
-      background:white;
-    ">
-  </iframe>
+      <div class="input-demo">
+        <span>Start call or write message</span>
+        <button onclick="document.querySelector('.widget-box').scrollIntoView({behavior:'smooth'});">➤</button>
+      </div>
 
-</div>
-<div class="input-demo">
-  <span>Start call or write message</span>
-  <button>➤</button>
-</div>
       <div class="tags">
         <div class="tag">AI Agents</div>
         <div class="tag">Features</div>
