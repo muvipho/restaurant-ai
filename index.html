@@ -1,483 +1,211 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Muvipho Restaurant AI</title>
-  <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
-  <style>
-    :root {
-      --bg: #07090f;
-      --panel: #d9d9db;
-      --text: #f0f0f0;
-      --muted: #a5a5a8;
-      --accent: #21d06f;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Muvipho AI - Restaurant Voice Agent</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --accent: #22c55e;
+            --accent-hover: #16a34a;
+            --bg-dark: #0d0d0e;
+            --text-muted: #888888;
+            --surface: rgba(255, 255, 255, 0.05);
+            --surface-border: rgba(255, 255, 255, 0.1);
+        }
 
-    * {
-      box-sizing: border-box;
-    }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: Arial, sans-serif;
-      background:
-        radial-gradient(circle at 15% 20%, rgba(38, 42, 56, 0.45), transparent 45%),
-        radial-gradient(circle at 85% 40%, rgba(60, 64, 79, 0.32), transparent 38%),
-        #080b12;
-      color: var(--text);
-    }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            background: radial-gradient(circle at 10% 20%, #17181c 0%, #0d0d0e 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
 
-    .layout {
-      width: min(1300px, 100% - 48px);
-      margin: 24px auto;
-      display: grid;
-      grid-template-columns: 1.05fr 0.95fr;
-      gap: 28px;
-      align-items: start;
-    }
+        .container {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 10vh 5%;
+            min-height: 100vh;
+            gap: 4rem;
+        }
 
-    .left {
-      padding: 24px 8px;
-    }
+        /* Left Side: Services */
+        .hero {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
 
-    .eyebrow {
-      letter-spacing: 0.4em;
-      color: #9b9ca0;
-      margin: 0 0 18px;
-      font-size: 30px;
-      opacity: 0.9;
-    }
+        .subtitle {
+            color: var(--text-muted);
+            font-family: monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.2rem;
+            margin-bottom: 2rem;
+        }
 
-    .title {
-      font-size: clamp(42px, 5.2vw, 86px);
-      line-height: 1.06;
-      letter-spacing: -0.02em;
-      margin: 0 0 24px;
-      max-width: 14ch;
-    }
+        .title {
+            font-size: clamp(2rem, 4vw, 4rem);
+            font-weight: 300;
+            line-height: 1.1;
+            margin-bottom: 4rem;
+        }
 
-    .service-list {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      display: grid;
-      gap: 18px;
-    }
+        .services {
+            list-style: none;
+        }
 
-    .service-list li {
-      font-size: clamp(27px, 2.1vw, 40px);
-      color: #b8b9bc;
-      display: flex;
-      gap: 16px;
-      align-items: baseline;
-    }
+        .services li {
+            font-size: clamp(1.2rem, 2vw, 2.2rem);
+            font-weight: 300;
+            margin-bottom: 1.5rem;
+            opacity: 0.6;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: baseline;
+            gap: 1.5rem;
+        }
 
-    .service-list .num {
-      color: #8c8d92;
-      font-size: 0.65em;
-      min-width: 1.5em;
-    }
+        .services li:hover {
+            opacity: 1;
+            transform: translateX(15px);
+            color: var(--accent);
+        }
 
-    .phone-wrap {
-      display: flex;
-      justify-content: center;
-      padding-top: 8px;
-    }
+        .services li span {
+            font-size: 1rem;
+            color: var(--text-muted);
+            font-family: monospace;
+        }
 
-    .phone {
-      width: min(430px, 100%);
-      height: min(980px, 92vh);
-      background: var(--panel);
-      border-radius: 38px;
-      border: 2px solid rgba(255, 255, 255, 0.8);
-      padding: 12px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
-      color: #111;
-      display: flex;
-      flex-direction: column;
-    }
+        /* Right Side: Agent Card */
+        .agent-container {
+            width: 450px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-    .phone-hero {
-      position: relative;
-      border-radius: 24px;
-      overflow: hidden;
-      height: 200px;
-      background: #222;
-    }
+        .agent-card {
+            background: #f4f4f5;
+            width: 100%;
+            height: 75vh;
+            border-radius: 2rem;
+            position: relative;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
 
-    .phone-hero img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      filter: brightness(0.86);
-    }
+        .agent-image {
+            width: 100%;
+            height: 320px;
+            object-fit: cover;
+            border-radius: 1.5rem;
+            padding: 0.5rem;
+        }
 
-    .hero-overlay {
-      position: absolute;
-      inset: 0;
-      display: grid;
-      align-content: center;
-      justify-items: center;
-      gap: 14px;
-      color: #fff;
-      padding: 20px;
-      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-    }
+        .agent-info {
+            padding: 1rem;
+            text-align: center;
+            color: #18181b;
+        }
 
-    .brand {
-      letter-spacing: 0.22em;
-      font-size: 36px;
-      font-weight: 700;
-    }
+        .agent-name {
+            font-size: 0.8rem;
+            letter-spacing: 0.2rem;
+            text-transform: uppercase;
+            color: #71717a;
+            margin-bottom: 0.5rem;
+        }
 
-    .call-chip {
-      border: 0;
-      background: var(--accent);
-      color: #05170b;
-      font-weight: 700;
-      font-size: 20px;
-      padding: 12px 28px;
-      border-radius: 999px;
-      cursor: pointer;
-      min-width: 160px;
-      transition: background-color 0.2s ease, color 0.2s ease;
-    }
+        /* ElevenLabs Widget Styling Overlay */
+        .widget-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
 
-    .call-chip.in-call {
-      background: #e43b3b;
-      color: #fff;
-    }
+        /* Hide the default ElevenLabs background to blend in */
+        elevenlabs-convai {
+            --elevenlabs-widget-background: transparent;
+            --elevenlabs-widget-border: none;
+            --elevenlabs-widget-primary-color: #22c55e;
+            width: 100% !important;
+        }
 
-    .agent-shell {
-      margin-top: 12px;
-      border-radius: 20px;
-      background: #f2f2f3;
-      flex: 1;
-      min-height: 0;
-      position: relative;
-      overflow: hidden;
-      border: 1px solid rgba(0, 0, 0, 0.06);
-    }
-
-    #phone-agent {
-      position: absolute;
-      inset: 0;
-      z-index: 3;
-      pointer-events: none;
-      --el-overlay-padding: 8px;
-      --el-base: #f3f3f4;
-      --el-base-hover: #ececef;
-      --el-base-active: #e5e5e7;
-      --el-base-border: #d2d2d5;
-      --el-base-primary: #121212;
-      --el-base-subtle: #6d6d71;
-      --el-accent: #171717;
-      --el-accent-hover: #2a2a2a;
-      --el-accent-active: #3a3a3a;
-      --el-accent-primary: #f3f3f4;
-      --el-button-radius: 18px;
-      --el-input-radius: 16px;
-      --el-sheet-radius: 18px;
-    }
-
-    .custom-input {
-      position: absolute;
-      left: 10px;
-      right: 10px;
-      bottom: 10px;
-      z-index: 5;
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 8px;
-      background: #3b3b3d;
-      border-radius: 999px;
-      padding: 8px 10px 8px 16px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      transition: opacity 0.2s ease, transform 0.2s ease;
-    }
-
-    .custom-input.hidden {
-      opacity: 0;
-      pointer-events: none;
-      transform: translateY(8px);
-    }
-
-    .custom-input input {
-      border: 0;
-      background: transparent;
-      color: #e7e7e8;
-      font-size: 24px;
-      outline: none;
-      width: 100%;
-    }
-
-    .custom-input input::placeholder {
-      color: #adadb0;
-    }
-
-    .send-btn {
-      border: 0;
-      background: transparent;
-      color: #bebec2;
-      font-size: 36px;
-      line-height: 1;
-      cursor: pointer;
-      padding: 0 8px;
-    }
-
-    @media (max-width: 1080px) {
-      .layout {
-        grid-template-columns: 1fr;
-      }
-
-      .left {
-        order: 2;
-        padding-top: 6px;
-      }
-
-      .phone-wrap {
-        order: 1;
-      }
-
-      .brand {
-        font-size: 28px;
-      }
-
-      .call-chip {
-        font-size: 18px;
-        padding: 10px 22px;
-        min-width: 140px;
-      }
-
-      .agent-shell {
-        min-height: 520px;
-      }
-
-      .custom-input input {
-        font-size: 18px;
-      }
-    }
-  </style>
+        @media (max-width: 1024px) {
+            .container {
+                flex-direction: column;
+                padding: 2rem;
+            }
+            .agent-container {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
-  <main class="layout">
-    <section class="left">
-      <p class="eyebrow">/ SERVICES /</p>
-      <h1 class="title">From planning to personalized experiences</h1>
-      <ul class="service-list">
-        <li><span class="num">01</span> /Pre-Arrival Assistance/</li>
-        <li><span class="num">02</span> /Dining Recommendations/</li>
-        <li><span class="num">03</span> /Reservations/</li>
-        <li><span class="num">04</span> /Menu Information/</li>
-        <li><span class="num">05</span> /Event Information/</li>
-        <li><span class="num">06</span> /Feedback Management/</li>
-        <li><span class="num">07</span> /Local Attractions/</li>
-      </ul>
-    </section>
 
-    <section class="phone-wrap">
-      <div class="phone">
-        <div class="phone-hero">
-          <img src="https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=1200&q=80" alt="Restaurant" />
-          <div class="hero-overlay">
-            <div class="brand">MUVIPHO</div>
-            <button id="callBtn" class="call-chip" type="button">☎ Call</button>
-          </div>
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="hero">
+            <p class="subtitle">/ Services /</p>
+            <h1 class="title">From planning to personalized experiences</h1>
+            <ul class="services">
+                <li><span>01</span> /Pre-Arrival Assistance/</li>
+                <li><span>02</span> /Dining Recommendations/</li>
+                <li><span>03</span> /Reservations/</li>
+                <li><span>04</span> /Menu Information/</li>
+                <li><span>05</span> /Event Information/</li>
+                <li><span>06</span> /Feedback Management/</li>
+                <li><span>07</span> /Local Attractions/</li>
+            </ul>
         </div>
 
-        <div class="agent-shell">
-          <elevenlabs-convai
-            id="phone-agent"
-            agent-id="agent_9101krknqev9f2wrjyc3h05ha712"
-            variant="full"
-            placement="bottom"
-            text-input="false"
-            transcript="true"
-            show-agent-status="false"
-            default-expanded="true"
-            always-expanded="true"
-            allow-events="true"
-          ></elevenlabs-convai>
+        <!-- Agent Widget Section -->
+        <div class="agent-container">
+            <div class="agent-card">
+                <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800" alt="Aria" class="agent-image">
+                
+                <div class="agent-info">
+                    <p class="agent-name">Muvipho Agent</p>
+                    <p style="font-weight: 500;">Hi, I'm Aria. How can I help you?</p>
+                </div>
 
-          <form id="textForm" class="custom-input" autocomplete="off">
-            <input id="textInput" type="text" placeholder="Start call or write message" />
-            <button class="send-btn" type="submit" aria-label="Send">➤</button>
-          </form>
+                <div class="widget-wrapper">
+                    <script src="https://elevenlabs.io/convai-widget/index.js" async type="text/javascript"></script>
+                    <elevenlabs-convai agent-id="agent_9101krknqev9f2wrjyc3h05ha712"></elevenlabs-convai>
+                </div>
+                
+                <p style="text-align: center; font-size: 0.6rem; color: #a1a1aa; padding: 1rem;">
+                    POWERED BY <b>MUVIPHO</b>
+                </p>
+            </div>
         </div>
-      </div>
-    </section>
-  </main>
+    </div>
 
-  <script>
-    const INTERNAL_STYLE_ID = "muvipho-widget-overrides";
-
-    function getWidget() {
-      return document.getElementById("phone-agent");
-    }
-
-    function getCallChip() {
-      return document.getElementById("callBtn");
-    }
-
-    function ensureWidgetOverrides(widget) {
-      if (!widget || !widget.shadowRoot) {
-        return;
-      }
-      if (widget.shadowRoot.getElementById(INTERNAL_STYLE_ID)) {
-        return;
-      }
-
-      const style = document.createElement("style");
-      style.id = INTERNAL_STYLE_ID;
-      style.textContent = `
-        button[aria-label="Start a call"],
-        button[aria-label="New call"],
-        button[aria-label="End"],
-        button[aria-label="End call"],
-        button[aria-label="Mute microphone"] {
-          display: none !important;
-        }
-      `;
-      widget.shadowRoot.appendChild(style);
-    }
-
-    function hasActiveEndControl(root) {
-      if (!root) {
-        return false;
-      }
-      return !!root.querySelector(
-        'button[aria-label="End"], button[aria-label="End call"]'
-      );
-    }
-
-    function syncCallChipState() {
-      const widget = getWidget();
-      const callChip = getCallChip();
-      if (!callChip) {
-        return;
-      }
-
-      const inCall = !!widget && !!widget.shadowRoot && hasActiveEndControl(widget.shadowRoot);
-      callChip.classList.toggle("in-call", inCall);
-      callChip.textContent = inCall ? "✕ End" : "☎ Call";
-    }
-
-    function getInternalControlButton(root) {
-      if (!root) {
-        return null;
-      }
-      const endButton = root.querySelector(
-        'button[aria-label="End"], button[aria-label="End call"]'
-      );
-      if (endButton) {
-        return endButton;
-      }
-      return root.querySelector(
-        'button[aria-label="Start a call"], button[aria-label="New call"], button[aria-label*="call" i]'
-      );
-    }
-
-    function hasTermsModal(widget) {
-      if (!widget || !widget.shadowRoot) {
-        return false;
-      }
-      return !!widget.shadowRoot.querySelector(".terms, [class*='terms']");
-    }
-
-    function syncCustomInputVisibility() {
-      const widget = getWidget();
-      const inputBar = document.getElementById("textForm");
-      if (!inputBar) {
-        return;
-      }
-      inputBar.classList.toggle("hidden", hasTermsModal(widget));
-      syncCallChipState();
-    }
-
-    function observeWidgetState() {
-      const widget = getWidget();
-      if (!widget) {
-        return;
-      }
-
-      function attachObserver() {
-        if (!widget.shadowRoot) {
-          return;
-        }
-        ensureWidgetOverrides(widget);
-        const observer = new MutationObserver(syncCustomInputVisibility);
-        observer.observe(widget.shadowRoot, { childList: true, subtree: true });
-        syncCustomInputVisibility();
-      }
-
-      if (widget.shadowRoot) {
-        attachObserver();
-      } else {
-        setTimeout(attachObserver, 600);
-      }
-    }
-
-    function startCallFromCustomButton() {
-      const widget = getWidget();
-      if (!widget) {
-        return;
-      }
-
-      widget.dispatchEvent(
-        new CustomEvent("elevenlabs-agent:expand", {
-          bubbles: true,
-          detail: { action: "expand" }
-        })
-      );
-
-      setTimeout(function () {
-        const root = widget.shadowRoot;
-        if (!root) {
-          return;
-        }
-
-        const callButton = getInternalControlButton(root);
-        if (callButton) {
-          callButton.click();
-        }
-        syncCallChipState();
-      }, 120);
-    }
-
-    function sendMessageToAgent(text) {
-      const widget = getWidget();
-      if (!widget || !text) {
-        return;
-      }
-
-      widget.dispatchEvent(
-        new CustomEvent("elevenlabs-agent:user-message", {
-          bubbles: true,
-          detail: { message: text }
-        })
-      );
-    }
-
-    document.getElementById("callBtn").addEventListener("click", startCallFromCustomButton);
-
-    const textForm = document.getElementById("textForm");
-    const textInput = document.getElementById("textInput");
-    observeWidgetState();
-    syncCustomInputVisibility();
-    syncCallChipState();
-
-    textForm.addEventListener("submit", function (event) {
-      event.preventDefault();
-      const message = textInput.value.trim();
-      if (!message) {
-        return;
-      }
-
-      sendMessageToAgent(message);
-      textInput.value = "";
-    });
-  </script>
 </body>
 </html>
