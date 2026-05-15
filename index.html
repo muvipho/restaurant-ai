@@ -141,7 +141,24 @@
       letter-spacing:2px;
       margin-top:30px;
     }
+.input-demo{
+  margin:30px 14px 10px;
+  background:#3a3a3a;
+  color:#aaa;
+  border-radius:999px;
+  padding:16px 18px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:16px;
+}
 
+.input-demo button{
+  background:none;
+  border:none;
+  color:#aaa;
+  font-size:26px;
+}
     @media(max-width:900px){
       body{padding:30px 18px}
       .page{grid-template-columns:1fr}
@@ -149,6 +166,7 @@
       .services{font-size:26px}
       .phone{min-height:auto}
     }
+    
   </style>
 </head>
 
@@ -174,11 +192,9 @@
     <div class="phone">
       <div class="hero">
         <div class="brand">MUVIPHO</div>
-       <a href="https://elevenlabs.io/app/talk-to?agent_id=agent_9101krknqev9f2wrjyc3h05ha712"
-   target="_blank"
-   class="call-button">
-   ☎ Call
-</a>
+       <button class="call-button" onclick="alert('Please use the voice widget at the bottom-right to start the AI call.')">
+  ☎ Call
+</button>
       </div>
 
       <div class="message">
@@ -202,7 +218,10 @@
   </iframe>
 
 </div>
-
+<div class="input-demo">
+  <span>Start call or write message</span>
+  <button>➤</button>
+</div>
       <div class="tags">
         <div class="tag">AI Agents</div>
         <div class="tag">Features</div>
