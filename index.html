@@ -349,20 +349,6 @@
 </head>
 <body>
 
-  <!-- ElevenLabs widget is hidden; custom UI controls it -->
-  <div style="position:fixed;right:0;bottom:0;width:1px;height:1px;opacity:0.01;overflow:hidden;z-index:-1;" aria-hidden="true">
-    <elevenlabs-convai
-      id="elWidget"
-      agent-id="agent_9101krknqev9f2wrjyc3h05ha712"
-      allow-events="true"
-      always-expanded="true"
-      transcript="true"
-      text-input="false"
-      show-agent-status="false"
-    ></elevenlabs-convai>
-  </div>
-  <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
-
   <div class="layout">
     <div class="hero">
       <p class="subtitle">/ services /</p>
@@ -415,7 +401,9 @@
     </div>
   </div>
 
-  <script>
+  <script type="module">
+    import { Conversation } from "https://cdn.jsdelivr.net/npm/@elevenlabs/client/+esm";
+
     const callBtn = document.getElementById('callBtn');
     const callLabel = document.getElementById('callLabel');
     const chatArea = document.getElementById('chatArea');
@@ -424,7 +412,8 @@
     const pills = Array.from(document.querySelectorAll('.pill'));
 
     let callState = 'idle'; // idle | connecting | connected
-    let widget = null;
+    let conversation = null;
+    const AGENT_ID = 'agent_9101krknqev9f2wrjyc3h05ha712';
 
     function setState(next) {
       callState = next;
@@ -465,142 +454,115 @@
       chatArea.scrollTop = chatArea.scrollHeight;
     }
 
-    function getWidgetButton() {
-      const root = widget && widget.shadowRoot;
-      if (!root) return null;
-
-      const endBtn = root.querySelector(
-        'button[aria-label="End"], button[aria-label="End call"], button[aria-label*="end" i]'
-      );
-      if (endBtn) return endBtn;
-
-      const startBtn = root.querySelector(
-        'button[aria-label="Start a call"], button[aria-label="New call"], button[aria-label*="start" i], button[aria-label*="call" i]'
-      );
-      return startBtn;
-    }
-
-    function refreshCallStateFromShadow() {
-      const root = widget && widget.shadowRoot;
-      if (!root) return;
-
-      const hasEnd = !!root.querySelector(
-        'button[aria-label="End"], button[aria-label="End call"], button[aria-label*="end" i]'
-      );
-
-      if (hasEnd && callState !== 'connected') {
-        setState('connected');
-        setStatusLine('Aria dinliyor...');
-      }
-
-      if (!hasEnd && callState === 'connected') {
-        setState('idle');
-        setStatusLine(null);
-      }
-    }
-
-    function setupWidgetObserver() {
-      const root = widget && widget.shadowRoot;
-      if (!root) return;
-
-      const observer = new MutationObserver(refreshCallStateFromShadow);
-      observer.observe(root, {
-        subtree: true,
-        childList: true,
-        attributes: true,
-        characterData: true
-      });
-
-      refreshCallStateFromShadow();
-    }
-
-    async function triggerCallToggle() {
-      if (!widget) return false;
-
-      widget.dispatchEvent(new CustomEvent('elevenlabs-agent:expand', {
-        bubbles: true,
-        detail: { action: 'expand' }
-      }));
-
-      await new Promise(r => setTimeout(r, 160));
-      const btn = getWidgetButton();
-      if (!btn) return false;
-
-      btn.click();
-      return true;
-    }
-
-    async function onCallClick() {
-      if (callState === 'connecting') return;
-
-      if (callState === 'connected') {
-        const ok = await triggerCallToggle();
-        if (ok) {
-          setState('idle');
-          setStatusLine(null);
-        }
+    function handleConversationMessage(message) {
+      if (!message || typeof message.message !== 'string' || !message.message.trim()) {
         return;
       }
+      if (message.source === 'ai' || message.role === 'agent') {
+        addBubble(message.message, false);
+      }
+    }
 
+    async function startConversation() {
       setState('connecting');
       setStatusLine('Baglaniyor (Lutfen bekleyin)...');
 
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         stream.getTracks().forEach(t => t.stop());
-      } catch (err) {
+      } catch (_err) {
         setState('idle');
         setStatusLine(null);
         addBubble('Mikrofon izni gerekli. Lutfen tarayici izinlerini kontrol edin.');
-        return;
+        return false;
       }
 
-      const ok = await triggerCallToggle();
-      if (!ok) {
+      try {
+        conversation = await Conversation.startSession({
+          agentId: AGENT_ID,
+          connectionType: "webrtc",
+          onConnect: () => {
+            setState('connected');
+            setStatusLine('Aria dinliyor...');
+          },
+          onDisconnect: () => {
+            setState('idle');
+            setStatusLine(null);
+            conversation = null;
+          },
+          onMessage: handleConversationMessage,
+          onError: (error) => {
+            console.error('[Muvipho] Conversation error:', error);
+            setState('idle');
+            setStatusLine(null);
+            addBubble('Baglanti hatasi olustu. Lutfen tekrar deneyin.');
+            conversation = null;
+          },
+          onStatusChange: ({ status }) => {
+            if (status === 'connecting') {
+              setState('connecting');
+            } else if (status === 'connected') {
+              setState('connected');
+            } else if (status === 'disconnected') {
+              setState('idle');
+            }
+          },
+          onModeChange: ({ mode }) => {
+            if (mode === 'listening') {
+              setStatusLine('Aria dinliyor...');
+            } else if (mode === 'speaking') {
+              setStatusLine('Aria konusuyor...');
+            }
+          }
+        });
+        return true;
+      } catch (error) {
+        console.error('[Muvipho] startSession failed:', error);
         setState('idle');
         setStatusLine(null);
-        addBubble('Arama baslatilamadi. Sayfayi yenileyip tekrar deneyin.');
+        addBubble('Arama baslatilamadi. Agent private ise token endpoint gerekir.');
+        conversation = null;
+        return false;
+      }
+    }
+
+    async function onCallClick() {
+      if (callState === 'connecting') return;
+
+      if (callState === 'connected' && conversation) {
+        try {
+          await conversation.endSession();
+        } catch (error) {
+          console.error('[Muvipho] endSession failed:', error);
+        } finally {
+          setState('idle');
+          setStatusLine(null);
+          conversation = null;
+        }
         return;
       }
 
-      setTimeout(refreshCallStateFromShadow, 400);
+      await startConversation();
     }
 
-    function onSend() {
+    async function onSend() {
       const text = chatInput.value.trim();
       if (!text) return;
 
       addBubble(text, true);
       chatInput.value = '';
 
-      if (widget) {
-        widget.dispatchEvent(new CustomEvent('elevenlabs-agent:user-message', {
-          bubbles: true,
-          detail: { message: text }
-        }));
+      if (!conversation) {
+        const started = await startConversation();
+        if (!started || !conversation) return;
       }
-    }
 
-    function initWidget() {
-      widget = document.getElementById('elWidget');
-      if (!widget) return;
-
-      setupWidgetObserver();
-    }
-
-    function waitForWidgetReady() {
-      let tries = 0;
-      const timer = setInterval(() => {
-        tries += 1;
-        const el = document.getElementById('elWidget');
-        if (el && customElements.get('elevenlabs-convai')) {
-          clearInterval(timer);
-          initWidget();
-        }
-        if (tries > 120) {
-          clearInterval(timer);
-        }
-      }, 100);
+      try {
+        conversation.sendUserMessage(text);
+      } catch (error) {
+        console.error('[Muvipho] sendUserMessage failed:', error);
+        addBubble('Mesaj gonderilemedi. Lutfen tekrar deneyin.');
+      }
     }
 
     callBtn.addEventListener('click', onCallClick);
@@ -619,7 +581,11 @@
       });
     });
 
-    waitForWidgetReady();
+    chatInput.addEventListener('input', () => {
+      if (conversation && typeof conversation.sendUserActivity === 'function') {
+        conversation.sendUserActivity();
+      }
+    });
   </script>
 </body>
 </html>
